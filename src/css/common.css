@@ -16,3 +16,30 @@ img {
   display: block;
   max-width: 100%;
 }
+
+.timer {
+  display: flex;
+  gap: 10px;
+}
+
+.value {
+  width: 60px;
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 26px;
+  position: relative;
+}
+
+.value:not(.value[data-seconds])::after {
+  content: ':';
+  position: absolute;
+  right: -5px;
+}
+
+.label {
+  display: block;
+  text-transform: uppercase;
+  font-size: 12px;
+  text-align: center;
+}
