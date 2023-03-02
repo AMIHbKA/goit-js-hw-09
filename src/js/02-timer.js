@@ -1,6 +1,7 @@
 import flatpickr from 'flatpickr';
 import { Ukrainian } from 'flatpickr/dist/l10n/uk.js';
 import 'flatpickr/dist/flatpickr.min.css';
+import { Notify } from 'notiflix';
 
 const refs = {
   btnStart: document.querySelector('button[data-start]'),
@@ -29,10 +30,12 @@ const options = {
     refs.dateFromFuture = refs.diffTime > 0;
     if (refs.dateFromFuture === false) {
       refs.btnStart.disabled = true;
-      alert('Please choose a date in the future');
+      showWarning();
+      repaintTimerVal(0);
       return;
     }
 
+    repaintTimerVal(refs.diffTime);
     refs.btnStart.disabled = false;
   },
 };
@@ -42,6 +45,12 @@ const fp = flatpickr('#datetime-picker', options);
 refs.btnStart.addEventListener('click', onBtnStartHandler);
 
 function onBtnStartHandler(e) {
+  if (refs.choosenDate < new Date()) {
+    showWarning();
+    repaintTimerVal(0);
+    return;
+  }
+
   refs.intervalId = setInterval(timerCount, 1000);
   // В условиях сказано, что "Если таймер запущен, для того чтобы выбрать новую дату и перезапустить его - необходимо перезагрузить страницу".
   fp.destroy();
@@ -53,13 +62,7 @@ function timerCount() {
   if (diffTime <= 1000) {
     clearInterval(refs.intervalId);
   }
-
-  const { days, hours, minutes, seconds } = convertMs(diffTime);
-
-  refs.days.textContent = addLeadingZero(days);
-  refs.hours.textContent = addLeadingZero(hours);
-  refs.minutes.textContent = addLeadingZero(minutes);
-  refs.seconds.textContent = addLeadingZero(seconds);
+  repaintTimerVal(diffTime);
 }
 
 function convertMs(ms) {
@@ -83,4 +86,19 @@ function convertMs(ms) {
 
 function addLeadingZero(value) {
   return value.toString().padStart(2, 0);
+}
+
+function repaintTimerVal(diffTime) {
+  const { days, hours, minutes, seconds } = convertMs(diffTime);
+
+  refs.days.textContent = addLeadingZero(days);
+  refs.hours.textContent = addLeadingZero(hours);
+  refs.minutes.textContent = addLeadingZero(minutes);
+  refs.seconds.textContent = addLeadingZero(seconds);
+}
+
+function showWarning() {
+  Notify.failure('Please choose a date in the future', {
+    timeout: 3000,
+  });
 }
