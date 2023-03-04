@@ -1,45 +1,45 @@
 import flatpickr from 'flatpickr';
 import { Ukrainian } from 'flatpickr/dist/l10n/uk.js';
 import 'flatpickr/dist/flatpickr.min.css';
-import { Notify } from 'notiflix';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const refs = {
   btnStart: document.querySelector('button[data-start]'),
-  choosenDate: 0,
-  dateFromFuture: false,
-  diffTime: 0,
-  intervalId: null,
   days: document.querySelector('span[data-days]'),
   hours: document.querySelector('span[data-hours]'),
   minutes: document.querySelector('span[data-minutes]'),
   seconds: document.querySelector('span[data-seconds]'),
 };
 
-refs.btnStart.disabled = true;
+let choosenDate = 0;
+let dateFromFuture = false;
+let diffTime = 0;
+let intervalId = null;
 
 const options = {
   dateFormat: 'd-m-Y H:i',
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
-  minuteIncrement: 1,
+  minuteIncrement: 5,
   locale: Ukrainian,
   onClose(selectedDates) {
-    refs.choosenDate = selectedDates[0];
-    refs.diffTime = refs.choosenDate - new Date();
-    refs.dateFromFuture = refs.diffTime > 0;
-    if (refs.dateFromFuture === false) {
+    choosenDate = selectedDates[0];
+    diffTime = choosenDate - new Date();
+    dateFromFuture = diffTime > 0;
+    if (!dateFromFuture) {
       refs.btnStart.disabled = true;
       showWarning();
       repaintTimerVal(0);
       return;
     }
 
-    repaintTimerVal(refs.diffTime);
+    repaintTimerVal(diffTime);
     refs.btnStart.disabled = false;
   },
 };
 
+refs.btnStart.disabled = true;
 const fp = flatpickr('#datetime-picker', options);
 
 refs.btnStart.addEventListener('click', onBtnStartHandler);
@@ -51,7 +51,7 @@ function onBtnStartHandler(e) {
     return;
   }
 
-  refs.intervalId = setInterval(timerCount, 1000);
+  intervalId = setInterval(timerCount, 1000);
   // В условиях сказано, что "Если таймер запущен, для того чтобы выбрать новую дату и перезапустить его - необходимо перезагрузить страницу".
   // Пошел по простому пути и просто удаляю календарь и отключаю кнопку
   // хотя можно было просто выключать кнопку, но за одно поэксперементировал с календарем :)
@@ -60,11 +60,12 @@ function onBtnStartHandler(e) {
 }
 
 function timerCount() {
-  const diffTime = refs.choosenDate - new Date();
-  if (diffTime <= 1000) {
-    clearInterval(refs.intervalId);
+  const difference = choosenDate - new Date();
+
+  if (difference <= 1000) {
+    clearInterval(intervalId);
   }
-  repaintTimerVal(diffTime);
+  repaintTimerVal(difference);
 }
 
 function convertMs(ms) {
@@ -90,8 +91,8 @@ function addLeadingZero(value) {
   return value.toString().padStart(2, 0);
 }
 
-function repaintTimerVal(diffTime) {
-  const { days, hours, minutes, seconds } = convertMs(diffTime);
+function repaintTimerVal(time) {
+  const { days, hours, minutes, seconds } = convertMs(time);
 
   refs.days.textContent = addLeadingZero(days);
   refs.hours.textContent = addLeadingZero(hours);
