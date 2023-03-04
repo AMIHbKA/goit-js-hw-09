@@ -5,34 +5,32 @@ function createPromise(position, delay) {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (shouldResolve) {
-        // Fulfill
         resolve(`✅ Fulfilled promise ${position} in ${delay}ms`);
-      } else {
-        // Reject
-        reject(`❌ Rejected promise ${position} in ${delay}ms`);
       }
+      reject(`❌ Rejected promise ${position} in ${delay}ms`);
     }, delay);
   });
 }
 
-const refs = {
-  firstDelay: document.querySelector('input[name="delay"]'),
-  stepDelay: document.querySelector('input[name="step"]'),
-  amount: document.querySelector('input[name="amount"]'),
-  btnCreate: document.querySelector('button[type="submit"]'),
-};
+const {
+  delay: delayEl,
+  step: stepEl,
+  amount: amountEl,
+} = document.querySelector('.form').elements;
 
-refs.btnCreate.addEventListener('click', () => {
-  console.log('click');
-});
+function onFormSubmit(e) {
+  e.preventDefault();
 
-createPromise(1, 3000)
-  .then(f => Notify.success(f))
-  .catch(r => Notify.failure(r));
-createPromise(2, 1000)
-  .then(f => Notify.success(f))
-  .catch(r => Notify.failure(r));
+  let delay = Number(delayEl.value);
+  const STEP_DELAY = Number(stepEl.value);
+  const AMOUNT = Number(amountEl.value);
 
-function onClickBtnCreatePromises() {
-    if ()
+  for (let i = 1; i <= AMOUNT; i += 1) {
+    createPromise(i, delay)
+      .then(success => Notify.success(success))
+      .catch(error => Notify.failure(error));
+    delay += STEP_DELAY;
   }
+}
+
+addEventListener('submit', onFormSubmit);
