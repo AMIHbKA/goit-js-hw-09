@@ -13,15 +13,18 @@ function createPromise(position, delay) {
       }
     }, delay);
   });
-
-  return promise;
 }
 
 const refs = {
   firstDelay: document.querySelector('input[name="delay"]'),
   stepDelay: document.querySelector('input[name="step"]'),
   amount: document.querySelector('input[name="amount"]'),
+  btnCreate: document.querySelector('button[type="submit"]'),
 };
+
+refs.btnCreate.addEventListener('click', () => {
+  console.log('click');
+});
 
 createPromise(1, 3000)
   .then(f => Notify.success(f))
@@ -29,3 +32,7 @@ createPromise(1, 3000)
 createPromise(2, 1000)
   .then(f => Notify.success(f))
   .catch(r => Notify.failure(r));
+
+function onClickBtnCreatePromises() {
+    if ()
+  }
